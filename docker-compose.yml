@@ -1,0 +1,42 @@
+services:
+  agent:
+    image: agent
+    container_name: agent
+    build:
+      context: ./agent
+      dockerfile: textattack.dockerfile
+    networks:
+      - appnet
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_API_BASE=http://host.docker.internal:11434
+    develop:
+      watch:
+        - action: sync
+          path: ./agent/multi_tool_agent
+          target: /workspace/multi_tool_agent
+          ignore:
+            - .git/
+
+  backend:
+    image: backend
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: backend.dockerfile
+    networks:
+      - appnet
+    ports:
+      - "5000:5000"
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - .git/
+
+networks:
+  appnet:
+    driver: bridge
